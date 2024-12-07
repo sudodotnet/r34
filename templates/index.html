@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея изображений</title>
+    <!-- Стили Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .gallery img {
+            transition: transform 0.2s;
+            cursor: pointer;
+            width: 100%;
+            height: auto;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        .modal-dialog {
+            max-width: 600px; /* Уменьшаем ширину модального окна */
+            margin: 30px auto;
+        }
+        .modal-content {
+            width: 100%;
+        }
+        .modal-img {
+            width: 100%;
+            height: auto;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .page-link {
+            margin: 0 5px;
+            min-width: 36px;
+            text-align: center;
+        }
+        /* Мобильные устройства */
+        @media (max-width: 768px) {
+            .gallery img {
+                margin-bottom: 10px;
+            }
+            .col-md-3 {
+                max-width: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row gallery">
+            {% for image in images %}
+            <div class="col-md-3 col-6 mb-3">
+                <img src="{{ url_for('static', filename=image) }}" class="img-thumbnail" data-toggle="modal" data-target="#imageModal" data-img="{{ url_for('static', filename=image) }}" alt="Изображение">
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if current_page > 1 %}
+            <a href="/?page={{ current_page - 1 }}" class="btn btn-secondary">&laquo;</a>
+            {% else %}
+            <span class="btn btn-secondary disabled">&laquo;</span>
+            {% endif %}
+        
+            {% if current_page > 3 %}
+            <a href="/?page=1" class="btn btn-secondary page-link">1</a>
+            {% if current_page > 4 %}
+            <span class="page-link">...</span>
+            {% endif %}
+            {% endif %}
+        
+            {% for page in range(max(1, current_page - 2), min(total_pages + 1, current_page + 3)) %}
+            <a href="/?page={{ page }}" class="btn page-link {% if page == current_page %}btn-primary active{% else %}btn-secondary{% endif %}">{{ page }}</a>
+            {% endfor %}
+        
+            {% if current_page < total_pages - 2 %}
+            {% if current_page < total_pages - 3 %}
+            <span class="page-link">...</span>
+            {% endif %}
+            <a href="/?page={{ total_pages }}" class="btn btn-secondary page-link">{{ total_pages }}</a>
+            {% endif %}
+        
+            {% if current_page < total_pages %}
+            <a href="/?page={{ current_page + 1 }}" class="btn btn-secondary">&raquo;</a>
+            {% else %}
+            <span class="btn btn-secondary disabled">&raquo;</span>
+            {% endif %}
+        </div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="" class="modal-img" alt="Изображение">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты Bootstrap и jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $('#imageModal').on('show.bs.modal', function (event) {
+            var img = $(event.relatedTarget) // Картинка, которую кликнули
+            var src = img.data('img') // Получаем путь к полному изображению
+            var modal = $(this)
+            modal.find('.modal-img').attr('src', src)
+        });
+    </script>
+</body>
+</html>
